@@ -1,0 +1,37 @@
+name: WAHA app checks
+on:
+  push:
+    paths:
+      - addons/fourvrs_waha/**
+      - .github/workflows/waha-addon.yaml
+  pull_request:
+    paths:
+      - addons/fourvrs_waha/**
+      - .github/workflows/waha-addon.yaml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build app and test launcher
+        run: |
+          docker build -t fourvrs-waha:check addons/fourvrs_waha
+          docker run --rm -v "$PWD/addons/fourvrs_waha:/project:ro" -w /project --entrypoint node fourvrs-waha:check --test tests/options.test.cjs
+      - name: Smoke test API and persistent data without pairing a phone
+        run: python3 tools/check_waha_addon.py
+      - name: Test manifest and translations
+        run: docker run --rm -v "$PWD:/project:ro" -w /project --entrypoint python ghcr.io/home-assistant/home-assistant:stable -m unittest discover -s addons/fourvrs_waha/tests -v
+      - name: Validate Supervisor configuration
+        run: |
+          docker run --rm -v "$PWD:/project:ro" --entrypoint python3 ghcr.io/home-assistant/amd64-hassio-supervisor:latest -c '
+          import yaml
+          from pathlib import Path
+          from supervisor.apps.validate import SCHEMA_APP_CONFIG, SCHEMA_APP_TRANSLATIONS
+          root=Path("/project/addons/fourvrs_waha")
+          SCHEMA_APP_CONFIG(yaml.safe_load((root/"config.yaml").read_text()))
+          for path in (root/"translations").glob("*.yaml"):
+              SCHEMA_APP_TRANSLATIONS(yaml.safe_load(path.read_text()))
+          print("Supervisor configuration and translations: OK")'

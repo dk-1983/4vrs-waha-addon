@@ -1,0 +1,28 @@
+name: 4VRS WhatsApp (WAHA)
+version: "0.1.0"
+slug: fourvrs_waha
+description: WhatsApp QR pairing and HTTP API using WAHA Core
+url: https://github.com/dk-1983/4vrs-waha-addon
+arch:
+  - amd64
+startup: application
+boot: auto
+init: true
+timeout: 120
+backup: cold
+webui: http://[HOST]:[PORT:3000]/dashboard/
+ports:
+  3000/tcp: 3000
+ports_description:
+  3000/tcp: Authenticated WAHA API and dashboard
+options:
+  api_key: ""
+  dashboard_username: admin
+  dashboard_password: ""
+  log_level: warn
+schema:
+  api_key: password
+  dashboard_username: str
+  dashboard_password: password
+  log_level: list(warn|error)
+watchdog: tcp://[HOST]:[PORT:3000]

@@ -1,0 +1,15 @@
+configuration:
+  api_key:
+    name: API key
+    description: Set a private random key of at least 16 characters. Enter the same key in the intercom integration. Do not use the sha512 prefix.
+  dashboard_username:
+    name: Dashboard username
+    description: Login for the WAHA dashboard and API documentation. Default is admin.
+  dashboard_password:
+    name: Dashboard password
+    description: Set a separate password of at least 16 characters to protect the QR pairing dashboard.
+  log_level:
+    name: Log level
+    description: Upstream WAHA diagnostic level. Warning or error; verbose message logging is not enabled by this wrapper.
+network:
+  3000/tcp: WAHA API and QR pairing dashboard. Keep on a trusted local network; do not expose directly to the internet.
