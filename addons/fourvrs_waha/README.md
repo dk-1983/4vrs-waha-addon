@@ -12,6 +12,8 @@ integration uses its HTTP API to deliver personal passwords.
 - amd64 only; pinned upstream image, WEBJS/Chromium engine.
 - Version 0.2.1+: prebuilt GHCR image; no on-host Docker Hub build during install.
 - Private API key and separate dashboard credentials.
+- Version 0.3.0: optional dashboard authentication; API key remains required.
+- Specific, secret-free startup diagnostics in Russian and English.
 - Pairing data in `/data/sessions`, included in Supervisor app backups.
 - Watchdog and Docker health check. No automatic logout or re-pairing.
 - RU/EN configuration and instructions: [DOCS.md](DOCS.md).

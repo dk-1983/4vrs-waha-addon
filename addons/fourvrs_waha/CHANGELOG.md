@@ -1,3 +1,20 @@
+# 0.3.0
+
+- Optional dashboard authentication: disable the switch to open the dashboard
+  and API documentation without a login/password. API key protection stays on.
+- Saved dashboard credentials are retained while authentication is disabled.
+
+- Startup diagnostics identify the failing field or startup phase using safe,
+  static RU/EN messages; no settings or upstream exception values are logged.
+- Standalone read-only configuration validator.
+- Register nested tini as a child subreaper under Supervisor's init process.
+
+Диагностика запуска указывает конкретное поле или этап без вывода секретов.
+Добавлена отдельная проверка настроек без запуска WAHA. Устранено предупреждение
+вложенного tini под Supervisor.
+Авторизацию панели и документации API можно отключить отдельным переключателем;
+ключ API остаётся обязательным. Сохранённые реквизиты панели не удаляются.
+
 # 0.2.1
 
 - Publish the tested amd64 image to GitHub Container Registry for Supervisor

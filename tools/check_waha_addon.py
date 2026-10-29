@@ -40,7 +40,7 @@ try:
     run('volume', 'create', volume)
     run('run', '--rm', '-v', volume + ':/data', '--entrypoint', 'node', image, '-e',
         "require('fs').writeFileSync('/data/options.json',process.argv[1])", json.dumps(options))
-    run('run', '-d', '--name', name, '-v', volume + ':/data', image)
+    run('run', '-d', '--init', '--name', name, '-v', volume + ':/data', image)
     ready()
     script = r"""
     const assert=require('node:assert/strict');
@@ -61,22 +61,42 @@ try:
     ready()
     run('exec', name, 'node', '-e',
         "if(require('fs').readFileSync('/data/sessions/persistence-check','utf8')!=='retained')process.exit(1)")
+    # The dashboard can be anonymous without weakening API-key protection.
+    run('exec', name, 'node', '-e',
+        "const fs=require('fs');const p='/data/options.json';const o=JSON.parse(fs.readFileSync(p));"
+        "Object.assign(o,{dashboard_auth_enabled:false,dashboard_username:'',dashboard_password:''});"
+        "fs.writeFileSync(p,JSON.stringify(o));")
+    run('restart', name)
+    ready()
+    run('exec', name, 'node', '-e', r"""
+      const assert=require('node:assert/strict');
+      (async()=>{
+        const root='http://127.0.0.1:3000';
+        assert.equal((await fetch(root+'/dashboard/')).status,200);
+        assert.equal((await fetch(root+'/api/sessions')).status,401);
+      })().catch(()=>process.exit(1));
+    """)
+    logs = run('logs', name)
+    assert 'Generated credentials' not in logs.stdout + logs.stderr
+    assert 'Tini is not running as PID 1' not in logs.stderr
     logs = run('logs', name)
     for secret in (options['api_key'], options['dashboard_password']):
         assert secret not in logs.stdout + logs.stderr
+    assert "Tini is not running as PID 1" not in logs.stderr
     # Recreate rather than just restart: Supervisor updates keep the same /data.
     run('rm', '-f', name)
-    run('run', '-d', '--name', name, '-v', volume + ':/data', image)
+    run('run', '-d', '--init', '--name', name, '-v', volume + ':/data', image)
     ready()
     run('exec', name, 'node', '-e',
         "if(require('fs').readFileSync('/data/sessions/persistence-check','utf8')!=='retained')process.exit(1)")
     run('rm', '-f', name)
     run('run', '--rm', '-v', volume + ':/data', '--entrypoint', 'node', image, '-e',
         "require('fs').writeFileSync('/data/options.json','{}')")
-    bad = run('run', '--rm', '-v', volume + ':/data', image, check=False)
+    bad = run('run', '--rm', '--init', '-v', volume + ':/data', image, check=False)
     assert bad.returncode == 1
-    assert 'Set API key' in bad.stderr
-    print('WAHA app: authenticated API/dashboard, unpaired health, restart/recreate persistence, missing-secret refusal: OK')
+    assert '[api_key_invalid]' in bad.stderr
+    assert "Tini is not running as PID 1" not in bad.stderr
+    print('WAHA app: API key protected with and without dashboard authentication, nested init, persistence and safe diagnostics: OK')
 finally:
     run('rm', '-f', name, check=False)
     run('volume', 'rm', volume, check=False)

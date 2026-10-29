@@ -2,16 +2,28 @@
 
 ## English
 
+### Startup diagnostics (0.3.0+)
+
+On failure, the app log includes a stable code, for example
+`[dashboard_password_invalid]` or `[proxy_url_invalid]`, followed by a RU/EN
+explanation. Configuration values are never printed. Errors reading JSON/session
+storage or starting the upstream process have separate codes. To validate an
+existing container's settings without starting WAHA:
+`docker exec CONTAINER node /opt/fourvrs/validate.cjs` (while it is running).
+
 1. Add the published repository's **root URL** to Settings → Apps → App Store →
    Repositories. Do not use a `/tree/main` URL. Install **4VRS WhatsApp (WAHA)**.
    Supervisor downloads a prebuilt image from GitHub Container Registry (0.2.1+).
    The browser image is large and downloading can take several minutes.
 2. Before starting, open Configuration. Set `api_key` to a private random string
-   of at least 16 characters and `dashboard_password` to a different password of
-   at least 16 characters. Username defaults to `admin`. Save.
+   of at least 16 characters. For a password-free dashboard, turn off
+   `dashboard_auth_enabled`; username and password are not required. Otherwise,
+   set a separate `dashboard_password` of at least 16 characters; username
+   defaults to `admin`. Saved credentials are retained when switching off. Save.
 3. Start the app. Enable Start on boot and Watchdog. Open Web UI. The dashboard
-   uses the published port (3000 by default), rather than HA Ingress. Log in using
-   the configured dashboard username/password. If asked for an API connection,
+   uses the published port (3000 by default), rather than HA Ingress. If dashboard
+   authentication is enabled, log in using the configured username/password.
+   If asked for an API connection,
    enter `http://HA_LAN_IP:3000` and the API key.
 4. Create/start the `default` session in WAHA. Display QR. On the phone:
    WhatsApp → Linked devices → Link a device. Scan and wait for `WORKING`.
@@ -54,17 +66,28 @@ No standalone `docker compose` container is needed with this app.
 
 ## Русский
 
+### Диагностика запуска (0.3.0+)
+
+При ошибке в журнале появляется код, например `[dashboard_password_invalid]`
+или `[proxy_url_invalid]`, и пояснение на русском и английском. Значения полей
+не выводятся. Ошибки чтения JSON, хранилища и запуска WAHA различаются.
+Проверить настройки без повторного запуска WAHA внутри работающего контейнера:
+`docker exec ИМЯ_КОНТЕЙНЕРА node /opt/fourvrs/validate.cjs`.
+
 1. Добавьте **корневой URL опубликованного репозитория** в Настройки → Приложения →
    Магазин приложений → Репозитории. Ссылку с `/tree/main` использовать не нужно.
    Установите **4VRS WhatsApp (WAHA)**. С версии 0.2.1 Supervisor скачивает готовый
    образ из GitHub Container Registry. Загрузка большого образа с браузером
    может занять несколько минут; локальная сборка не требуется.
 2. До первого запуска откройте настройки дополнения. Задайте `api_key` — секретный
-   случайный ключ от 16 символов, и отдельный `dashboard_password` от 16 символов.
-   Логин по умолчанию `admin`. Сохраните настройки.
+   случайный ключ от 16 символов. Для панели без пароля выключите
+   «Авторизация панели» (`dashboard_auth_enabled`); логин и пароль не требуются.
+   Если авторизация включена, задайте отдельный `dashboard_password` от 16 символов,
+   логин по умолчанию `admin`. Выключение не стирает сохранённые реквизиты.
+   Сохраните настройки.
 3. Запустите дополнение. Включите запуск при загрузке и Watchdog. Нажмите
    «Открыть веб-интерфейс». Панель открывается через порт (по умолчанию 3000),
-   без HA Ingress. Войдите с заданными логином и паролем панели. Если панель
+   без HA Ingress. При включённой авторизации войдите с логином и паролем. Если панель
    запросит подключение API, укажите `http://IP_HA_В_СЕТИ:3000` и ключ API.
 4. Создайте/запустите сессию `default`, покажите QR-код. На телефоне: WhatsApp →
    Связанные устройства → Привязка устройства. Сканируйте код; дождитесь `WORKING`.

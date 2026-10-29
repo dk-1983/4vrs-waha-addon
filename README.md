@@ -14,6 +14,10 @@ App Store → Repositories, then install **4VRS WhatsApp (WAHA)**.
 
 [Installation / Установка](addons/fourvrs_waha/DOCS.md)
 
+Version 0.3.0 adds a switch for a password-free dashboard while keeping API-key
+protection, plus precise startup diagnostics. Версия 0.3.0 позволяет отключить
+авторизацию панели; ключ API остаётся обязательным. Диагностика указывает поле.
+
 Version 0.2.1 uses a prebuilt image from GitHub Container Registry, avoiding local
 Docker Hub builds during installation. Starting with 0.2.1, the public package is
 `ghcr.io/dk-1983/amd64-addon-fourvrs_waha` (tag equals app version).

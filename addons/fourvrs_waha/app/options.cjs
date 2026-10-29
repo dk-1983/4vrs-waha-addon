@@ -2,50 +2,56 @@
 
 const fs = require('node:fs');
 const net = require('node:net');
+const {ConfigurationError} = require('./config-error.cjs');
 
 function proxyOptions(value) {
   if (!value.proxy_enabled) return null;
   const raw = value.proxy_url;
   if (typeof raw !== 'string' || !/^(http|https|socks5):\/\/(\[[^\]]+\]|[^:/?#]+):[0-9]+\/?$/.test(raw) ||
-      /[\x00-\x20\x7f]/.test(raw)) throw new Error('Invalid proxy_url');
-  const parsed = new URL(raw);
+      /[\x00-\x20\x7f]/.test(raw)) throw new ConfigurationError('proxy_url_invalid');
+  let parsed;
+  try {parsed = new URL(raw);} catch {throw new ConfigurationError('proxy_url_invalid');}
   const host = parsed.hostname.replace(/^\[|\]$/g, '');
   if (parsed.username || parsed.password || parsed.search || parsed.hash ||
       (!net.isIP(host) && !/^[a-zA-Z0-9](?:[a-zA-Z0-9.-]*[a-zA-Z0-9])?$/.test(host))) {
-    throw new Error('Invalid proxy_url');
+    throw new ConfigurationError('proxy_url_invalid');
   }
   const explicitPort = Number(raw.match(/:([0-9]+)\/?$/)[1]);
-  if (explicitPort < 1 || explicitPort > 65535) throw new Error('Invalid proxy_url');
-  const username = value.proxy_username || '';
-  const password = value.proxy_password || '';
+  if (explicitPort < 1 || explicitPort > 65535) throw new ConfigurationError('proxy_url_invalid');
+  const username = value.proxy_username ?? '';
+  const password = value.proxy_password ?? '';
   if (typeof username !== 'string' || typeof password !== 'string' ||
       username.length > 255 || password.length > 255 || username.includes(':') ||
       /[\x00-\x1f\x7f]/.test(username + password) || Boolean(username) !== Boolean(password)) {
-    throw new Error('Invalid proxy credentials');
+    throw new ConfigurationError('proxy_credentials_invalid');
   }
-  if (parsed.protocol === 'socks5:' && username) throw new Error('SOCKS5 authentication unsupported by Chromium');
+  if (parsed.protocol === 'socks5:' && username) throw new ConfigurationError('proxy_socks_auth_unsupported');
   return {server: parsed.origin === 'null' ? raw.replace(/\/$/, '') : parsed.origin,
     username, password};
 }
 
 function readOptions(path = '/data/options.json') {
-  const value = JSON.parse(fs.readFileSync(path, 'utf8'));
+  let raw, value;
+  try {raw = fs.readFileSync(path, 'utf8');} catch {throw new ConfigurationError('options_read_failed');}
+  try {value = JSON.parse(raw);} catch {throw new ConfigurationError('options_json_invalid');}
+  if (!value || typeof value !== 'object' || Array.isArray(value)) throw new ConfigurationError('options_json_invalid');
   function text(key, min, max) {
     const result = value[key];
     if (typeof result !== 'string' || result.length < min || result.length > max ||
         /[\x00-\x1f\x7f]/.test(result) || result !== result.trim()) {
-      throw new Error(`Invalid ${key}`);
+      throw new ConfigurationError(key + '_invalid');
     }
     return result;
   }
   const apiKey = text('api_key', 16, 512);
   // Upstream interprets this prefix as a hash rather than a literal key.
-  if (apiKey.startsWith('sha512:')) throw new Error('Use a plain API key');
-  const username = text('dashboard_username', 1, 64);
-  if (username.includes(':')) throw new Error('Invalid dashboard_username');
-  const password = text('dashboard_password', 16, 512);
-  if (!['warn', 'error'].includes(value.log_level)) throw new Error('Invalid log_level');
-  return {apiKey, username, password, logLevel: value.log_level, proxy: proxyOptions(value)};
+  if (apiKey.startsWith('sha512:')) throw new ConfigurationError('api_key_hashed');
+  const dashboardAuth = value.dashboard_auth_enabled !== false;
+  const username = dashboardAuth ? text('dashboard_username', 1, 64) : '';
+  if (username.includes(':')) throw new ConfigurationError('dashboard_username_invalid');
+  const password = dashboardAuth ? text('dashboard_password', 16, 512) : '';
+  if (!['warn', 'error'].includes(value.log_level)) throw new ConfigurationError('log_level_invalid');
+  return {apiKey, username, password, dashboardAuth, logLevel: value.log_level, proxy: proxyOptions(value)};
 }
 
 function environment(options, inherited = {}) {
@@ -69,9 +75,11 @@ function environment(options, inherited = {}) {
     WHATSAPP_DEFAULT_ENGINE: 'WEBJS',
     WAHA_LOCAL_STORE_BASE_DIR: '/data/sessions',
     WAHA_DASHBOARD_ENABLED: 'True',
+    WAHA_DASHBOARD_NO_PASSWORD: options.dashboardAuth === false ? 'True' : 'False',
     WAHA_DASHBOARD_USERNAME: options.username,
     WAHA_DASHBOARD_PASSWORD: options.password,
     WHATSAPP_SWAGGER_ENABLED: 'True',
+    WHATSAPP_SWAGGER_NO_PASSWORD: options.dashboardAuth === false ? 'True' : 'False',
     WHATSAPP_SWAGGER_USERNAME: options.username,
     WHATSAPP_SWAGGER_PASSWORD: options.password,
     WAHA_PRINT_QR: 'False',

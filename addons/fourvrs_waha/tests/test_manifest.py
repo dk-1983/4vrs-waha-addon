@@ -8,7 +8,7 @@ ROOT = Path(__file__).resolve().parents[1]
 class ManifestTests(unittest.TestCase):
     def test_bilingual_options_network_and_independent_version(self):
         config = yaml.safe_load((ROOT / 'config.yaml').read_text())
-        self.assertEqual(config['version'], '0.2.1')
+        self.assertEqual(config['version'], '0.3.0')
         self.assertEqual(config['arch'], ['amd64'])
         self.assertEqual(config['image'], 'ghcr.io/dk-1983/{arch}-addon-fourvrs_waha')
         self.assertEqual(set(config['options']), set(config['schema']))
