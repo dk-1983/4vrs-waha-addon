@@ -4,7 +4,8 @@
 
 1. Add the published repository's **root URL** to Settings → Apps → App Store →
    Repositories. Do not use a `/tree/main` URL. Install **4VRS WhatsApp (WAHA)**.
-   Building the upstream browser image can take several minutes.
+   Supervisor downloads a prebuilt image from GitHub Container Registry (0.2.1+).
+   The browser image is large and downloading can take several minutes.
 2. Before starting, open Configuration. Set `api_key` to a private random string
    of at least 16 characters and `dashboard_password` to a different password of
    at least 16 characters. Username defaults to `admin`. Save.
@@ -55,7 +56,9 @@ No standalone `docker compose` container is needed with this app.
 
 1. Добавьте **корневой URL опубликованного репозитория** в Настройки → Приложения →
    Магазин приложений → Репозитории. Ссылку с `/tree/main` использовать не нужно.
-   Установите **4VRS WhatsApp (WAHA)**. Сборка может занять несколько минут.
+   Установите **4VRS WhatsApp (WAHA)**. С версии 0.2.1 Supervisor скачивает готовый
+   образ из GitHub Container Registry. Загрузка большого образа с браузером
+   может занять несколько минут; локальная сборка не требуется.
 2. До первого запуска откройте настройки дополнения. Задайте `api_key` — секретный
    случайный ключ от 16 символов, и отдельный `dashboard_password` от 16 символов.
    Логин по умолчанию `admin`. Сохраните настройки.

@@ -14,6 +14,12 @@ App Store → Repositories, then install **4VRS WhatsApp (WAHA)**.
 
 [Installation / Установка](addons/fourvrs_waha/DOCS.md)
 
+Version 0.2.1 uses a prebuilt image from GitHub Container Registry, avoiding local
+Docker Hub builds during installation. Starting with 0.2.1, the public package is
+`ghcr.io/dk-1983/amd64-addon-fourvrs_waha` (tag equals app version).
+С версии 0.2.1 устанавливается готовый образ из GitHub Container Registry;
+локальная сборка с обращением к Docker Hub не требуется.
+
 Version 0.2.0 adds an independent WhatsApp proxy switch (HTTP, HTTPS, SOCKS5).
 HTTP/HTTPS authentication is supported; Chromium SOCKS5 has no authentication.
 Версия 0.2.0 добавляет отдельный переключатель прокси WhatsApp: HTTP, HTTPS,
@@ -24,3 +30,12 @@ WAHA Core by devlikeapro is Apache 2.0. This separate 4VRS wrapper is also Apach
 WhatsApp/Meta or Home Assistant product. WAHA Plus is not included.
 
 [License and attribution](addons/fourvrs_waha/licenses/NOTICE.md)
+
+Maintainer: GitHub Actions publishes the tested image using its short-lived
+GITHUB_TOKEN. After the first publication, set the container package visibility
+to Public in GitHub Package settings before users install the app. Image tags
+match app versions; runtime settings and pairing data are never included.
+
+Для сопровождающего: после первой публикации образа откройте настройки пакета
+GitHub и задайте видимость Public. Actions использует временный GITHUB_TOKEN;
+в образ не включаются настройки пользователя и данные привязки.

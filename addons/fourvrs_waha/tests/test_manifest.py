@@ -10,6 +10,7 @@ class ManifestTests(unittest.TestCase):
         config = yaml.safe_load((ROOT / 'config.yaml').read_text())
         self.assertEqual(config['version'], '0.2.1')
         self.assertEqual(config['arch'], ['amd64'])
+        self.assertEqual(config['image'], 'ghcr.io/dk-1983/{arch}-addon-fourvrs_waha')
         self.assertEqual(set(config['options']), set(config['schema']))
         for lang in ('en', 'ru'):
             translation = yaml.safe_load((ROOT / 'translations' / f'{lang}.yaml').read_text())

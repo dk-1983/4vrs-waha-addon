@@ -10,6 +10,7 @@ integration uses its HTTP API to deliver personal passwords.
 по QR-коду. Интеграция домофона отправляет пароли через API дополнения.
 
 - amd64 only; pinned upstream image, WEBJS/Chromium engine.
+- Version 0.2.1+: prebuilt GHCR image; no on-host Docker Hub build during install.
 - Private API key and separate dashboard credentials.
 - Pairing data in `/data/sessions`, included in Supervisor app backups.
 - Watchdog and Docker health check. No automatic logout or re-pairing.
