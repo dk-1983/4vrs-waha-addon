@@ -1,3 +1,13 @@
+# 0.2.1
+
+- Publish the tested amd64 image to GitHub Container Registry for Supervisor
+  installations without on-host Docker Hub builds.
+- Runtime, proxy options and stored session data are unchanged.
+
+Готовый проверенный образ amd64 публикуется в GitHub Container Registry,
+чтобы устанавливать дополнение без локальной сборки через Docker Hub.
+Работа приложения и настройки прокси не изменены.
+
 # 0.2.0
 
 - Independent WhatsApp proxy switch with HTTP, HTTPS and unauthenticated SOCKS5.

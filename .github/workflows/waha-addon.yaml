@@ -18,6 +18,9 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       - uses: actions/checkout@v4
       - name: Build app and test launcher
@@ -41,3 +44,17 @@ jobs:
           for path in (root/"translations").glob("*.yaml"):
               SCHEMA_APP_TRANSLATIONS(yaml.safe_load(path.read_text()))
           print("Supervisor configuration and translations: OK")'
+      - name: Log in to GitHub Container Registry
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && github.repository == 'dk-1983/4vrs-waha-addon'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish the tested image
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && github.repository == 'dk-1983/4vrs-waha-addon'
+        run: |
+          VERSION=$(python3 -c 'from pathlib import Path; print(next(line.split(":",1)[1].strip().strip(chr(34)) for line in Path("addons/fourvrs_waha/config.yaml").read_text().splitlines() if line.startswith("version:")))')
+          IMAGE="ghcr.io/dk-1983/amd64-addon-fourvrs_waha:$VERSION"
+          docker tag fourvrs-waha:check "$IMAGE"
+          docker push "$IMAGE"
