@@ -1,6 +1,32 @@
 'use strict';
 
 const fs = require('node:fs');
+const net = require('node:net');
+
+function proxyOptions(value) {
+  if (!value.proxy_enabled) return null;
+  const raw = value.proxy_url;
+  if (typeof raw !== 'string' || !/^(http|https|socks5):\/\/(\[[^\]]+\]|[^:/?#]+):[0-9]+\/?$/.test(raw) ||
+      /[\x00-\x20\x7f]/.test(raw)) throw new Error('Invalid proxy_url');
+  const parsed = new URL(raw);
+  const host = parsed.hostname.replace(/^\[|\]$/g, '');
+  if (parsed.username || parsed.password || parsed.search || parsed.hash ||
+      (!net.isIP(host) && !/^[a-zA-Z0-9](?:[a-zA-Z0-9.-]*[a-zA-Z0-9])?$/.test(host))) {
+    throw new Error('Invalid proxy_url');
+  }
+  const explicitPort = Number(raw.match(/:([0-9]+)\/?$/)[1]);
+  if (explicitPort < 1 || explicitPort > 65535) throw new Error('Invalid proxy_url');
+  const username = value.proxy_username || '';
+  const password = value.proxy_password || '';
+  if (typeof username !== 'string' || typeof password !== 'string' ||
+      username.length > 255 || password.length > 255 || username.includes(':') ||
+      /[\x00-\x1f\x7f]/.test(username + password) || Boolean(username) !== Boolean(password)) {
+    throw new Error('Invalid proxy credentials');
+  }
+  if (parsed.protocol === 'socks5:' && username) throw new Error('SOCKS5 authentication unsupported by Chromium');
+  return {server: parsed.origin === 'null' ? raw.replace(/\/$/, '') : parsed.origin,
+    username, password};
+}
 
 function readOptions(path = '/data/options.json') {
   const value = JSON.parse(fs.readFileSync(path, 'utf8'));
@@ -19,13 +45,23 @@ function readOptions(path = '/data/options.json') {
   if (username.includes(':')) throw new Error('Invalid dashboard_username');
   const password = text('dashboard_password', 16, 512);
   if (!['warn', 'error'].includes(value.log_level)) throw new Error('Invalid log_level');
-  return {apiKey, username, password, logLevel: value.log_level};
+  return {apiKey, username, password, logLevel: value.log_level, proxy: proxyOptions(value)};
 }
 
 function environment(options, inherited = {}) {
   const result = {...inherited};
   // Never inherit an alternate credential that overrides the configured API key.
   delete result.WHATSAPP_API_KEY;
+  // Disabled means direct; never inherit an ambient proxy or proxy rotation list.
+  for (const key of ['WHATSAPP_PROXY_SERVER', 'WHATSAPP_PROXY_SERVER_LIST',
+    'WHATSAPP_PROXY_SERVER_INDEX_PREFIX', 'WHATSAPP_PROXY_SERVER_USERNAME',
+    'WHATSAPP_PROXY_SERVER_PASSWORD', 'HTTP_PROXY', 'HTTPS_PROXY', 'ALL_PROXY',
+    'http_proxy', 'https_proxy', 'all_proxy']) delete result[key];
+  if (options.proxy) {
+    result.WHATSAPP_PROXY_SERVER = options.proxy.server;
+    result.WHATSAPP_PROXY_SERVER_USERNAME = options.proxy.username;
+    result.WHATSAPP_PROXY_SERVER_PASSWORD = options.proxy.password;
+  }
   return Object.assign(result, {
     WAHA_API_KEY: options.apiKey,
     WHATSAPP_API_HOSTNAME: '0.0.0.0',
@@ -47,4 +83,4 @@ function environment(options, inherited = {}) {
   });
 }
 
-module.exports = {readOptions, environment};
+module.exports = {readOptions, environment, proxyOptions};

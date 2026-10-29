@@ -11,5 +11,17 @@ configuration:
   log_level:
     name: Log level
     description: Upstream WAHA diagnostic level. Warning or error; verbose message logging is not enabled by this wrapper.
+  proxy_enabled:
+    name: Use proxy for WhatsApp
+    description: Independent switch for WAHA outbound WhatsApp traffic. Off means direct. Does not configure Docker image downloads or the local API connection.
+  proxy_url:
+    name: Proxy address
+    description: http://host:port, https://host:port or socks5://host:port. No embedded login/password. SOCKS5 authentication is unsupported by Chromium. Remove per-session proxy overrides in the WAHA dashboard.
+  proxy_username:
+    name: Proxy username
+    description: Optional username for HTTP/HTTPS proxy authentication. Leave both credential fields empty for no authentication.
+  proxy_password:
+    name: Proxy password
+    description: Password for HTTP/HTTPS proxy authentication. This Supervisor field stores the actual value; it is not a blank-to-keep field.
 network:
   3000/tcp: WAHA API and QR pairing dashboard. Keep on a trusted local network; do not expose directly to the internet.

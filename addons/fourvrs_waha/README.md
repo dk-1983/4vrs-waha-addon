@@ -17,5 +17,6 @@ integration uses its HTTP API to deliver personal passwords.
 - WAHA Core: Apache 2.0; wrapper: Apache 2.0. [Attribution](licenses/NOTICE.md).
 
 This remains a community app installed from a custom repository, not an official
-Home Assistant or WhatsApp product. WAHA Plus is not included. Proxy configuration
-is planned separately; this release requires working WhatsApp network access.
+Home Assistant or WhatsApp product. WAHA Plus is not included. Version 0.2.0 adds
+an independent proxy switch: HTTP, HTTPS or SOCKS5 without authentication.
+HTTP/HTTPS proxy authentication is supported. Docker downloads need separate routing.

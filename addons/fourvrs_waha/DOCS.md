@@ -33,7 +33,19 @@ health check also permits an empty session list while awaiting QR pairing.
 
 Update via App Store after refreshing the repository. Upstream is pinned to a
 tested image digest, so updates arrive as app releases; there is no hidden
-unattended upstream image replacement. Proxy settings will be added separately.
+unattended upstream image replacement.
+
+### Proxy (0.2.0)
+
+Enable `proxy_enabled` independently of Telegram. Set `proxy_url` to
+`http://host:port`, `https://host:port` or `socks5://host:port`. Credentials go into
+`proxy_username` and `proxy_password`; leave both empty for no authentication.
+Chromium does not support SOCKS5 authentication; use HTTP/HTTPS if credentials
+are required. HTTPS proxies need trusted TLS certificates. Save and restart WAHA.
+Disabling keeps your settings but removes the container's proxy route. There is
+no automatic direct fallback. Remove per-session `config.proxy` overrides in the
+WAHA dashboard, as those take priority over global settings. The HA-to-WAHA API
+connection remains direct. This switch does not configure Docker image downloads.
 
 For local testing without a public repository, copy the `fourvrs_waha` directory
 into HA's `/addons` directory, reload the App Store and install from Local apps.
@@ -74,8 +86,20 @@ QR-кода не считается сбоем, в том числе для пр
 
 Обновления доступны через магазин после обновления списка репозиториев. Версия
 WAHA зафиксирована по digest: она меняется вместе с выпуском дополнения.
-Самовольной подмены образа при запуске нет. Подключение через прокси — следующий
-этап; для этой версии нужен работающий сетевой доступ WhatsApp.
+Самовольной подмены образа при запуске нет.
+
+### Прокси (0.2.0)
+
+Включите `proxy_enabled` независимо от Telegram. В `proxy_url` задайте
+`http://адрес:порт`, `https://адрес:порт` или `socks5://адрес:порт`. Учётные данные
+вводятся в `proxy_username` и `proxy_password`; для работы без авторизации оба
+поля оставьте пустыми. Chromium не поддерживает авторизацию SOCKS5 — если нужны
+логин и пароль, используйте HTTP/HTTPS. HTTPS-прокси нужен доверенный сертификат.
+Сохраните и перезапустите WAHA. Отключение переключателя сохраняет параметры,
+но убирает маршрут прокси контейнера. Автоматического перехода на прямой маршрут
+нет. Удалите отдельные `config.proxy` сессии в панели WAHA: у них приоритет.
+Соединение HA с локальным API WAHA остаётся прямым. Этот переключатель
+не настраивает скачивание Docker-образов.
 
 Для локальной установки без публичного репозитория скопируйте папку
 `fourvrs_waha` в `/addons` на HA, обновите магазин и установите из локальных

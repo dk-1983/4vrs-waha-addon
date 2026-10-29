@@ -1,5 +1,5 @@
 name: 4VRS WhatsApp (WAHA)
-version: "0.1.0"
+version: "0.2.0"
 slug: fourvrs_waha
 description: WhatsApp QR pairing and HTTP API using WAHA Core
 url: https://github.com/dk-1983/4vrs-waha-addon
@@ -20,9 +20,17 @@ options:
   dashboard_username: admin
   dashboard_password: ""
   log_level: warn
+  proxy_enabled: false
+  proxy_url: ""
+  proxy_username: ""
+  proxy_password: ""
 schema:
   api_key: password
   dashboard_username: str
   dashboard_password: password
   log_level: list(warn|error)
+  proxy_enabled: bool
+  proxy_url: str
+  proxy_username: str
+  proxy_password: password
 watchdog: tcp://[HOST]:[PORT:3000]

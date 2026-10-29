@@ -4,10 +4,14 @@ on:
     paths:
       - addons/fourvrs_waha/**
       - .github/workflows/waha-addon.yaml
+      - tools/check_waha_addon.py
+      - tools/check_waha_proxy.cjs
   pull_request:
     paths:
       - addons/fourvrs_waha/**
       - .github/workflows/waha-addon.yaml
+      - tools/check_waha_addon.py
+      - tools/check_waha_proxy.cjs
   workflow_dispatch:
 permissions:
   contents: read
@@ -22,6 +26,8 @@ jobs:
           docker run --rm -v "$PWD/addons/fourvrs_waha:/project:ro" -w /project --entrypoint node fourvrs-waha:check --test tests/options.test.cjs
       - name: Smoke test API and persistent data without pairing a phone
         run: python3 tools/check_waha_addon.py
+      - name: Test Chromium HTTP HTTPS and SOCKS5 proxies with local fixtures
+        run: docker run --rm -v "$PWD:/project:ro" -w /project --entrypoint node fourvrs-waha:check tools/check_waha_proxy.cjs
       - name: Test manifest and translations
         run: docker run --rm -v "$PWD:/project:ro" -w /project --entrypoint python ghcr.io/home-assistant/home-assistant:stable -m unittest discover -s addons/fourvrs_waha/tests -v
       - name: Validate Supervisor configuration

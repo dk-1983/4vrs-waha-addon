@@ -14,6 +14,11 @@ App Store → Repositories, then install **4VRS WhatsApp (WAHA)**.
 
 [Installation / Установка](addons/fourvrs_waha/DOCS.md)
 
+Version 0.2.0 adds an independent WhatsApp proxy switch (HTTP, HTTPS, SOCKS5).
+HTTP/HTTPS authentication is supported; Chromium SOCKS5 has no authentication.
+Версия 0.2.0 добавляет отдельный переключатель прокси WhatsApp: HTTP, HTTPS,
+SOCKS5. Авторизация поддерживается для HTTP/HTTPS; SOCKS5 в Chromium — без неё.
+
 WAHA Core by devlikeapro is Apache 2.0. This separate 4VRS wrapper is also Apache
 2.0. We do not claim authorship of WAHA or WhatsApp. This is not an official
 WhatsApp/Meta or Home Assistant product. WAHA Plus is not included.
